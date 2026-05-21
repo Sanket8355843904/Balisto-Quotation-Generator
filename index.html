@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Balisto — Dealer Tool</title>
+<style>
+:root {
+  --orange: #E05C00;
+  --dark:   #1A1A2E;
+  --bg:     #F4F5F7;
+  --white:  #FFFFFF;
+  --border: #E0E0E0;
+  --green:  #2EA043;
+  --red:    #DA3633;
+  --text:   #1A1A2E;
+  --muted:  #6B7280;
+  --radius: 14px;
+  --nav-h:  64px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: calc(var(--nav-h) + 16px);
+  font-size: 15px;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--dark);
+  padding: 14px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-logo {
+  width: 36px; height: 36px;
+  background: var(--orange);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: white;
+  flex-shrink: 0;
+}
+.topbar-title { color: white; font-size: 16px; font-weight: 700; }
+.topbar-sub   { color: #8B949E; font-size: 11px; margin-top: 1px; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+  transition: color 0.2s;
+  padding: 8px 0;
+  border: none;
+  background: none;
+}
+.nav-item svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.nav-item.active { color: var(--orange); }
+
+/* ── PANELS ── */
+.panel { display: none; padding: 16px; }
+.panel.active { display: block; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+}
+.card-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card-label::before {
+  content: '';
+  width: 3px; height: 12px;
+  background: var(--orange);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── FORM FIELDS ── */
+.field { margin-bottom: 12px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.field input, .field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  background: #FAFBFC;
+  color: var(--text);
+  outline: none;
+  appearance: none;
+  transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--orange);
+  background: white;
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── WEEK PILL ── */
+.week-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #FFF3E0;
+  color: var(--orange);
+  border: 1px solid rgba(224,92,0,0.2);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  margin-left: 6px;
+}
+
+/* ── RESULT CARDS ── */
+.result-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.result-col {
+  background: #F8F9FA;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.result-col-hd {
+  background: var(--dark);
+  color: white;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 10px;
+}
+.result-row {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.result-row:last-child { border-bottom: none; }
+.rl { font-size: 10px; color: var(--muted); font-weight: 500; }
+.rv { font-size: 14px; font-weight: 700; color: var(--text); }
+.rv.orange { color: var(--orange); font-size: 16px; }
+.rv.green  { color: var(--green); }
+
+/* ── BUFFER ── */
+.buf-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.buf-card {
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  border: 1px solid var(--border);
+  background: #F8F9FA;
+}
+.buf-card.pos { background: #F0FFF4; border-color: rgba(46,160,67,0.3); }
+.buf-card.neg { background: #FFF0F0; border-color: rgba(218,54,51,0.3); }
+.buf-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+.buf-val   { font-size: 20px; font-weight: 800; color: var(--text); }
+.buf-card.pos .buf-val { color: var(--green); }
+.buf-card.neg .buf-val { color: var(--red); }
+
+/* ── LOADING / ERROR ── */
+.loading-msg {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  display: none;
+}
+.err-msg {
+  background: #FFF0F0;
+  border: 1px solid rgba(218,54,51,0.3);
+  color: var(--red);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-top: 10px;
+  display: none;
+}
+
+/* ── QUOTATION ── */
+.item-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.item-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.grand-bar {
+  background: var(--dark);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.grand-bar span:first-child { color: #8B949E; font-size: 13px; font-weight: 500; }
+.grand-bar span:last-child  { color: var(--orange); font-size: 20px; font-weight: 800; }
+
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  background: var(--orange);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary:active   { opacity: 0.85; }
+
+.status-ok  {
+  background: #F0FFF4; color: var(--green);
+  border: 1px solid rgba(46,160,67,0.3);
+  border-radius: 10px; padding: 12px 14px;
+  font-size: 13px; margin-top: 12px; display: none;
+}
+.status-err {
+  background: #FFF0F0; color: var(--red);
+  border: 1px solid rgba(218,54,51,0.3);
+  border-radius: 10px; padding: 12px 14px;
+  font-size: 13px; margin-top: 12px; display: none;
+}
+.status-ok a { color: #1F6FEB; font-weight: 600; }
+
+/* ── QUOTATION PREVIEW (print) ── */
+.quot-preview {
+  display: none;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-top: 14px;
+  overflow: hidden;
+}
+.quot-preview.show { display: block; }
+.quot-lh-wrap { position: relative; width: 100%; }
+.quot-lh-wrap img { width: 100%; display: block; }
+.quot-content {
+  padding: 20px 20px 28px;
+}
+.quot-title {
+  text-align: center;
+  color: var(--orange);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.quot-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.quot-customer { margin-bottom: 14px; }
+.quot-customer p { font-size: 12px; margin-bottom: 3px; }
+.quot-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin: 12px 0;
+}
+.quot-table th {
+  background: var(--dark);
+  color: white;
+  padding: 7px 8px;
+  text-align: left;
+  font-size: 10px;
+}
+.quot-table th:not(:first-child) { text-align: center; }
+.quot-table td {
+  padding: 7px 8px;
+  border: 1px solid #E0E0E0;
+  font-size: 11px;
+}
+.quot-table td:not(:first-child) { text-align: center; }
+.quot-table tr:nth-child(even) td { background: #F8F9FA; }
+.quot-total td {
+  background: #FFF3E0 !important;
+  font-weight: 700;
+  color: var(--orange);
+}
+.quot-footer-note {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 10px;
+}
+.quot-sig { margin-top: 32px; }
+.quot-sig-label { font-size: 11px; color: var(--orange); font-weight: 600; margin-bottom: 28px; }
+.quot-sig-line  { border-top: 1px solid #CCC; padding-top: 5px; font-size: 11px; color: var(--muted); }
+
+.print-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--dark);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  font-family: inherit;
+}
+
+@media print {
+  body { padding: 0; background: white; }
+  .topbar, .bottom-nav, .card:not(.print-only), .print-btn,
+  .btn-primary, #panel-calc, .tabs-wrap { display: none !important; }
+  .panel { display: block !important; padding: 0 !important; }
+  .quot-preview { display: block !important; border: none !important; border-radius: 0 !important; }
+  #panel-quot > *:not(.quot-preview) { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">B</div>
+  <div>
+    <div class="topbar-title">Balisto Agritech</div>
+    <div class="topbar-sub">Dealer Sales Tool</div>
+  </div>
+</div>
+
+<!-- ══ CALCULATOR PANEL ══ -->
+<div class="panel active" id="panel-calc">
+
+  <div class="card">
+    <div class="card-label">Inputs</div>
+
+    <div class="field">
+      <label>Today's Date</label>
+      <input type="date" id="c-date" onchange="fetchBase()" />
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Single Battery Margin %</label>
+        <input type="number" id="c-ms" value="16" min="0" max="50" step="0.5" oninput="calculate()" />
+      </div>
+      <div class="field">
+        <label>Double Battery Margin %</label>
+        <input type="number" id="c-md" value="16" min="0" max="50" step="0.5" oninput="calculate()" />
+      </div>
+    </div>
+    <div class="err-msg" id="c-err"></div>
+  </div>
+
+  <div class="loading-msg" id="c-load">Fetching prices from sheet…</div>
+
+  <div id="c-results" style="display:none;">
+    <div class="card-label" style="padding: 0 4px; margin-bottom: 10px;">
+      Results
+      <span class="week-pill" id="c-week">Week —</span>
+    </div>
+
+    <div class="result-pair">
+      <div class="result-col">
+        <div class="result-col-hd">Single Battery</div>
+        <div class="result-row"><span class="rl">Customer MRP</span><span class="rv" id="s-mrp">—</span></div>
+        <div class="result-row"><span class="rl">Floor Price</span><span class="rv" id="s-base">—</span></div>
+        <div class="result-row"><span class="rl">Dealer Price</span><span class="rv orange" id="s-dp">—</span></div>
+        <div class="result-row"><span class="rl">Margin INR</span><span class="rv green" id="s-mi">—</span></div>
+        <div class="result-row"><span class="rl">Margin %</span><span class="rv" id="s-mp">—</span></div>
+      </div>
+      <div class="result-col">
+        <div class="result-col-hd">Double Battery</div>
+        <div class="result-row"><span class="rl">Customer MRP</span><span class="rv" id="d-mrp">—</span></div>
+        <div class="result-row"><span class="rl">Floor Price</span><span class="rv" id="d-base">—</span></div>
+        <div class="result-row"><span class="rl">Dealer Price</span><span class="rv orange" id="d-dp">—</span></div>
+        <div class="result-row"><span class="rl">Margin INR</span><span class="rv green" id="d-mi">—</span></div>
+        <div class="result-row"><span class="rl">Margin %</span><span class="rv" id="d-mp">—</span></div>
+      </div>
+    </div>
+
+    <div class="card-label" style="padding: 0 4px; margin-bottom: 10px;">Buffer (Dealer Price − Floor)</div>
+    <div class="buf-pair">
+      <div class="buf-card" id="buf-s-card">
+        <div class="buf-label">Single Battery</div>
+        <div class="buf-val" id="buf-s">—</div>
+      </div>
+      <div class="buf-card" id="buf-d-card">
+        <div class="buf-label">Double Battery</div>
+        <div class="buf-val" id="buf-d">—</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ QUOTATION PANEL ══ -->
+<div class="panel" id="panel-quot">
+
+  <div class="card">
+    <div class="card-label">Customer Details</div>
+    <div class="field"><label>Customer Name</label><input type="text" id="q-name" placeholder="e.g. Rajesh Patil" /></div>
+    <div class="field"><label>Address</label><input type="text" id="q-addr" placeholder="Village, Taluka, District" /></div>
+    <div class="field-row">
+      <div class="field"><label>Phone</label><input type="tel" id="q-phone" placeholder="+91 XXXXX XXXXX" /></div>
+      <div class="field"><label>Date</label><input type="date" id="q-date" /></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Items</div>
+
+    <div class="item-card">
+      <div class="item-card-title">Single Battery Variant</div>
+      <div class="field-row">
+        <div class="field"><label>Quantity</label><input type="number" id="q-sq" value="0" min="0" oninput="updateGrand()" /></div>
+        <div class="field"><label>Unit Price (₹)</label><input type="number" id="q-sp" value="250000" oninput="updateGrand()" /></div>
+      </div>
+    </div>
+
+    <div class="item-card">
+      <div class="item-card-title">Double Battery Variant</div>
+      <div class="field-row">
+        <div class="field"><label>Quantity</label><input type="number" id="q-dq" value="0" min="0" oninput="updateGrand()" /></div>
+        <div class="field"><label>Unit Price (₹)</label><input type="number" id="q-dp" value="300000" oninput="updateGrand()" /></div>
+      </div>
+    </div>
+
+    <div class="grand-bar">
+      <span>Grand Total (incl. GST 5%)</span>
+      <span id="q-grand">₹0</span>
+    </div>
+
+    <button class="btn-primary" id="q-btn" onclick="generateQuot()">Generate Quotation</button>
+    <div class="status-ok"  id="q-ok"></div>
+    <div class="status-err" id="q-err"></div>
+  </div>
+
+  <!-- PREVIEW — letterhead is the full-page background, content sits on top of it -->
+  <div class="quot-preview" id="quot-preview">
+    <div class="quot-lh-wrap">
+      <!-- Letterhead as full background -->
+      <img id="lh-img" src="" alt="Balisto Letterhead" />
+      <!-- Content overlaid on top portion of letterhead -->
+    </div>
+    <div class="quot-content" id="quot-content">
+      <!-- filled by JS -->
+    </div>
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-calc" onclick="switchPanel('calc')">
+    <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="15" x2="12" y2="15"/></svg>
+    Calculator
+  </button>
+  <button class="nav-item" id="nav-quot" onclick="switchPanel('quot')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+    Quotation
+  </button>
+</nav>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymA1eqacdxF2sCaEo03r-LCuk7gAdEDoFZSFQBRDBO8l_xm72itJzpCZU-GgPicse_Rg/exec';
+const LETTERHEAD_URL  = 'https://raw.githubusercontent.com/Sanket8355843904/Balisto-Quotation-Generator/main/letterhead.jpg';
+const MRP = { s: 250000, d: 300000 };
+
+let baseData = null;
+
+// ── NAVIGATION ──────────────────────────────────────────────────
+function switchPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+}
+
+// ── FORMAT ──────────────────────────────────────────────────────
+function fmt(n)  { return '₹' + Math.round(n).toLocaleString('en-IN'); }
+function fmtP(n) { return n.toFixed(1) + '%'; }
+
+// ── FETCH BASE PRICE FROM SHEET ─────────────────────────────────
+function fetchBase() {
+  const d = document.getElementById('c-date').value;
+  if (!d) return;
+
+  document.getElementById('c-load').style.display    = 'block';
+  document.getElementById('c-results').style.display = 'none';
+  document.getElementById('c-err').style.display     = 'none';
+
+  const url = APPS_SCRIPT_URL
+    + '?action=getBasePrice&date=' + encodeURIComponent(d)
+    + '&cb=' + Date.now();
+
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      document.getElementById('c-load').style.display = 'none';
+      if (res.error) throw new Error(res.error);
+      baseData = res;
+      document.getElementById('c-week').textContent =
+        'Week ' + res.week + (res.fallback ? ' (post-season)' : '');
+      document.getElementById('c-results').style.display = 'block';
+      calculate();
+    })
+    .catch(e => {
+      document.getElementById('c-load').style.display = 'none';
+      const err = document.getElementById('c-err');
+      err.style.display  = 'block';
+      err.textContent    = 'Could not fetch: ' + e.message;
+    });
+}
+
+// ── CALCULATE ───────────────────────────────────────────────────
+function calculate() {
+  if (!baseData) return;
+  const ms = parseFloat(document.getElementById('c-ms').value) / 100;
+  const md = parseFloat(document.getElementById('c-md').value) / 100;
+  const bs = baseData.singleBase;
+  const bd = baseData.doubleBase;
+
+  const dpS = Math.floor(MRP.s / (1 + ms) / 1000) * 1000;
+  const dpD = Math.floor(MRP.d / (1 + md) / 1000) * 1000;
+  const miS = MRP.s - dpS;
+  const miD = MRP.d - dpD;
+  const mpS = miS / MRP.s * 100;
+  const mpD = miD / MRP.d * 100;
+  const buS = dpS - bs;
+  const buD = dpD - bd;
+
+  document.getElementById('s-mrp').textContent  = fmt(MRP.s);
+  document.getElementById('s-base').textContent = fmt(bs);
+  document.getElementById('s-dp').textContent   = fmt(dpS);
+  document.getElementById('s-mi').textContent   = fmt(miS);
+  document.getElementById('s-mp').textContent   = fmtP(mpS);
+
+  document.getElementById('d-mrp').textContent  = fmt(MRP.d);
+  document.getElementById('d-base').textContent = fmt(bd);
+  document.getElementById('d-dp').textContent   = fmt(dpD);
+  document.getElementById('d-mi').textContent   = fmt(miD);
+  document.getElementById('d-mp').textContent   = fmtP(mpD);
+
+  function setBuf(cardId, valId, val) {
+    const c = document.getElementById(cardId);
+    document.getElementById(valId).textContent = fmt(val);
+    c.className = 'buf-card ' + (val > 0 ? 'pos' : val < 0 ? 'neg' : '');
+  }
+  setBuf('buf-s-card', 'buf-s', buS);
+  setBuf('buf-d-card', 'buf-d', buD);
+}
+
+// ── GRAND TOTAL ─────────────────────────────────────────────────
+function updateGrand() {
+  const sq = parseInt(document.getElementById('q-sq').value)   || 0;
+  const sp = parseFloat(document.getElementById('q-sp').value) || 0;
+  const dq = parseInt(document.getElementById('q-dq').value)   || 0;
+  const dp = parseFloat(document.getElementById('q-dp').value) || 0;
+  document.getElementById('q-grand').textContent = fmt(sq * sp + dq * dp);
+}
+
+// ── GENERATE QUOTATION ──────────────────────────────────────────
+function generateQuot() {
+  const sq = parseInt(document.getElementById('q-sq').value)   || 0;
+  const sp = parseFloat(document.getElementById('q-sp').value) || 0;
+  const dq = parseInt(document.getElementById('q-dq').value)   || 0;
+  const dp = parseFloat(document.getElementById('q-dp').value) || 0;
+  const grand = sq * sp + dq * dp;
+
+  const name  = document.getElementById('q-name').value  || 'NA';
+  const addr  = document.getElementById('q-addr').value  || 'NA';
+  const phone = document.getElementById('q-phone').value || 'NA';
+  const date  = document.getElementById('q-date').value;
+  const dispDate = date
+    ? new Date(date + 'T00:00:00').toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})
+    : new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'});
+
+  // Generate quot number locally
+  const now   = new Date();
+  const yr    = now.getFullYear();
+  const yr2   = String(yr + 1).slice(2);
+  const seq   = String(Date.now()).slice(-4);
+  const quotNo = `BALISTO/${yr}-${yr2}/1/${seq}`;
+
+  // Build table rows
+  let rows = '';
+  if (sq > 0) rows += `<tr><td>Balisto 130 Pro 4801 — Single Battery Variant</td><td>${sq}</td><td>${fmt(sp)}</td><td>${fmt(sq*sp)}</td></tr>`;
+  if (dq > 0) rows += `<tr><td>Balisto 130 Pro 4801 — Double Battery Variant</td><td>${dq}</td><td>${fmt(dp)}</td><td>${fmt(dq*dp)}</td></tr>`;
+  if (!rows)  rows  = `<tr><td colspan="4" style="text-align:center;color:#888;">No items added</td></tr>`;
+
+  // Render preview with letterhead as header image
+  document.getElementById('lh-img').src = LETTERHEAD_URL;
+  document.getElementById('quot-content').innerHTML = `
+    <div class="quot-title">Quotation Summary</div>
+    <div class="quot-meta">
+      <span><strong>Quot No:</strong> ${quotNo}</span>
+      <span><strong>Date:</strong> ${dispDate}</span>
+    </div>
+    <div class="quot-customer">
+      <p><strong>Customer Name:</strong> ${name}</p>
+      <p><strong>Address:</strong> ${addr}</p>
+      <p><strong>Phone:</strong> ${phone}</p>
+    </div>
+    <strong style="font-size:12px;">Quotation Details:</strong>
+    <table class="quot-table">
+      <thead>
+        <tr>
+          <th>Item Name</th>
+          <th>Qty</th>
+          <th>Unit Price (incl GST)</th>
+          <th>Total (incl GST)</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr class="quot-total">
+          <td colspan="3" style="text-align:right;"><strong>Grand Total (incl. GST @ 5%)</strong></td>
+          <td><strong>${fmt(grand)}</strong></td>
+        </tr>
+      </tfoot>
+    </table>
+    <p class="quot-footer-note">All prices are inclusive of 5% GST. This quotation is valid for 7 days from the date of issue.</p>
+    <div class="quot-sig">
+      <p class="quot-sig-label">Authorised Signatory</p>
+      <div class="quot-sig-line">For Higher Orbit Agritech Pvt. Ltd.</div>
+    </div>
+  `;
+
+  document.getElementById('quot-preview').classList.add('show');
+  document.getElementById('quot-preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Log to sheet in background
+  const logUrl = APPS_SCRIPT_URL
+    + '?action=logQuotation'
+    + '&quotNo='   + encodeURIComponent(quotNo)
+    + '&date='     + encodeURIComponent(dispDate)
+    + '&customer=' + encodeURIComponent(name)
+    + '&address='  + encodeURIComponent(addr)
+    + '&phone='    + encodeURIComponent(phone)
+    + '&singleQty='+ sq + '&singlePrice=' + sp
+    + '&doubleQty='+ dq + '&doublePrice=' + dp
+    + '&grand='    + grand
+    + '&cb='       + Date.now();
+
+  fetch(logUrl).catch(() => {});
+
+  const ok = document.getElementById('q-ok');
+  ok.style.display = 'block';
+  ok.innerHTML = '✅ Quotation <strong>' + quotNo + '</strong> ready — scroll down to print';
+}
+
+// ── INIT ────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('c-date').value = today;
+  document.getElementById('q-date').value = today;
+  fetchBase();
+  updateGrand();
+});
+</script>
+</body>
+</html>
